@@ -12,7 +12,6 @@
 #include <unordered_map>
 #include <set>
 #include <algorithm>
-//#include </usr/local/include/boost/functional/hash.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/algorithm/string.hpp>
 #include <ctime>
@@ -29,7 +28,7 @@ vector<vector<int>> candidate_itemset;
 vector<vector<int>> frequent_itemset;
 
 //the result vector
-vector<vector<vector<int>>> total_frequent_itemset;
+//vector<vector<vector<int>>> total_frequent_itemset;
 vector<vector<vector<int>>> subset;
 
 template <typename Container>
@@ -60,35 +59,34 @@ void prune_subset() {
     }
 }
 
-//find the 1-element frequent set
+
+//find the 1- and 2-element frequent set
 void find_frequent_items(){
     vector<vector<int>> temp_list;
     for(int i = 0; i < data.size(); i++) {
-        vector<vector<int>> prep_subset;
+        vector<vector<int>> vec;
         for(int j = 0; j < data[i].size(); j++) {
             vector<int> key;
             key.push_back(data[i][j]);
-            prep_subset.push_back(key);
+            vec.push_back(key);
             if(hash_map.find(key) == hash_map.end()) {
                 hash_map[key] = 1;
             } else {
                 hash_map[key] = hash_map[key] + 1;
             }
         }
-        subset.push_back(prep_subset);
+        subset.push_back(vec);
     }
     prune_subset();
-    
+
     for(auto& pair : hash_map) {
         if(pair.second >= threshold) {
-//            frequent_items.push_back(pair.first);
             temp_list.push_back(pair.first);
             freq_num++;
         }
     }
+    
     sort(temp_list.begin(), temp_list.end());
-    total_frequent_itemset.push_back(temp_list);
-//    subset.push_back(temp_list);
     frequent_itemset = temp_list;
 }
 
@@ -107,6 +105,7 @@ vector<int> self_joining(vector<int> a, vector<int> b) {
 //    }
 //    cout<<"\n";
 //    if(a == test1 && b == test2) cout<<"jack"<< endl;
+    
     return a;
 }
 
@@ -124,7 +123,7 @@ bool qualified(vector<int> a, vector<int> b) {
     if(a[len - 1] > b[len - 1]) {
         return false;
     }
-    
+  
     return true;
 }
 
@@ -140,7 +139,7 @@ vector<vector<int>> prune_candidate_set(vector<vector<int>> candidate_set) {
     
     for(auto vec : candidate_set) {
         bool not_found = false;
-        vector<int> test = {1, 3, 5};
+//        vector<int> test = {1, 3, 5};
 //        if(vec == test) {
 //            cout<<"jack"<<endl;
 //        }
@@ -207,7 +206,6 @@ void update_candidate_set() {
     } else {
         candidate_itemset = candidate_set;
     }
-    
 }
 
 vector<vector<int>> generate_and_count_subset(size_t index, int i) {
@@ -221,22 +219,33 @@ vector<vector<int>> generate_and_count_subset(size_t index, int i) {
 //        }
 //        res.insert(res.end(), temp.begin(), temp.end());
 //    }
+//    vector<int> test = {1, 2};
     for(auto& j : subset[index]) {
-        vector<vector<int>> temp;
+//        vector<vector<int>> temp;
 //        cout<<subset[index].size()<<endl;
+        
         for(auto& num : data[index]) {
 //            cout<<num<<endl;
             if(j.size() > 0 && j[j.size() - 1] >= num) continue;
+            if(hash_map[j] < threshold) {
+                break;
+            }
             vector<int> vec = j;
+            
+//            if(vec == test) cout<<"jack"<<endl;
             vec.push_back(num);
-            temp.push_back(vec);
+//            temp.push_back(vec);
+            res.push_back(vec);
         }
 //        cout<<j.size()<<endl;
 //        print_vector(frequent_itemset);
-        res.insert(res.end(), temp.begin(), temp.end());
+//        if(update)
+//            res.insert(res.end(), temp.begin(), temp.end());
+//        if(j == test) cout<<"jack"<<endl;
     }
     
     for(auto& j : res) {
+//        if(j == test) cout<<"jack"<<endl;
         if(hash_map.find(j) == hash_map.end()) {
             hash_map[j] = 1;
         } else {
@@ -244,6 +253,7 @@ vector<vector<int>> generate_and_count_subset(size_t index, int i) {
         }
     }
     subset[index] = res;
+
     return res;
 }
 
@@ -253,9 +263,10 @@ void update_frequent_set(int i) {
     for(size_t index = 0; index < data.size(); index++) {
         generate_and_count_subset(index, i);
     }
-    prune_subset();
-    cout<<"Pruned subset"<<endl;
+//    prune_subset();
+//    cout<<"Pruned subset"<<endl;
     for(auto& it : candidate_itemset) {
+//        print_vector(candidate_itemset);
         if(hash_map[it] >= threshold) {
             temp_freq.push_back(it);
         }
@@ -270,13 +281,12 @@ void find_frequent_itemset() {
     for(int k = 1; k < freq_num; k++) {
         cout<<"Currently working on " << k << endl;
         update_candidate_set();
-//        print_vector(candidate_itemset);
         if(candidate_itemset.size() == 0) {
             break;
         }
         update_frequent_set(k + 1);
 //        print_vector(frequent_itemset);
-        total_frequent_itemset.push_back(frequent_itemset);
+//        total_frequent_itemset.push_back(frequent_itemset);
         
     }
 }
@@ -370,13 +380,24 @@ int main(int argc, const char * argv[]) {
     subset.reserve(data.size());
     find_frequent_items();
     cout<<"Done finding the first frequent itemset" << endl;
+    clock_t find_start = clock();
     find_frequent_itemset();
     vector<vector<int>> output;
-    for(auto& it : total_frequent_itemset) {
-        for(auto& ele : it) {
-            output.push_back(ele);
+    clock_t find_end = clock();
+    cout << "find time: " << (find_end-find_start)/double(CLOCKS_PER_SEC) << endl;
+//    for(auto& it : total_frequent_itemset) {
+//        for(auto& ele : it) {
+//            output.push_back(ele);
+//        }
+//    }
+    
+    vector<int> test = {1,2};
+    for(auto& pair : hash_map) {
+        if(pair.second >= threshold) {
+            output.push_back(pair.first);
         }
     }
+//
     sort(output.begin(), output.end(), [](const vector<int>& a, const vector<int>& b) {
         size_t len = min(a.size(), b.size());
         for(size_t i = 0; i < len; i++) {
@@ -407,7 +428,7 @@ int main(int argc, const char * argv[]) {
         }
         output_file.close();
     }
-    
+//
     clock_t end_time = clock();
     cout << "time: " << (end_time-start_time)/double(CLOCKS_PER_SEC) << endl;
     return 0;
