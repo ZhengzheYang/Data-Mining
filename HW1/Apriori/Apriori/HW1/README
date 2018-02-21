@@ -1,0 +1,4 @@
+To Compile: g++ --std=c++11 main.cpp
+To Run: ./a.out <FILE_NAME> <THRESHOLD> <OUTPUT_FILE_NAME>
+I used Boost library in my code, so if boost is not installed, my program might not compile.
+To install Boost: brew install boost
