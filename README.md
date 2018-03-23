@@ -1,2 +1,4 @@
 # Data-Mining
-Implement known data mining algorithms to process data and gain satisfactory speed and accuracy. 
+HW1: implemented Apriori algorithm using c++ to mine frequent itemsets.
+HW2: implemented C4.5 decision tree and Naive Bayesian Theorem using Java to classify datapoints
+HW3: implemented K-means clustering using Python to cluster data points
